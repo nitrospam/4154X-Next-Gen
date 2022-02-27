@@ -5,7 +5,7 @@
 //selector configuration
 #define HUE 180
 #define DEFAULT 1
-#define AUTONS "Middle Goal", "Right Goal", "Left Goal", "Right + Middle"
+#define AUTONS "Middle Goal", "Right Goal", "Left Goal", "RightMiddle"
 
 namespace selector{
 

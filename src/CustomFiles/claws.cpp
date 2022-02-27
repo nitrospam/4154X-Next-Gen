@@ -1,5 +1,8 @@
 #include "main.h"
 
+//vars
+bool goalInBackpack = false;
+
 //Helpers
 void clawActuate(){
     if(clawToggle == false){
@@ -40,10 +43,12 @@ void setClawPistons(){
     if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)){
         dumpTruckLeft.set_value(true);
         dumpTruckRight.set_value(true);
+        goalInBackpack = true;
     }
     if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)){
         dumpTruckLeft.set_value(false);
         dumpTruckRight.set_value(false);
+        goalInBackpack = false;
         intake = 0;
     }
 }

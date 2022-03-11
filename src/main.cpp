@@ -64,7 +64,7 @@ void autonomous() {
   if(selector::auton == 0)
     skills();
   }*/
-  rightGoalAuton();
+  testSkills();
 }
 
 

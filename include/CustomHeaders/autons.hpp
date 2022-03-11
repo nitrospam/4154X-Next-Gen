@@ -4,3 +4,7 @@ void skills();
 void midGoalAuton();
 void midRightAuton();
 void testerAuton();
+void leftHalfWinPoint();
+void rightHalfWinPoint();
+void fullWinPoint();
+void testSkills();

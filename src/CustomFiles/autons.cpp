@@ -3,12 +3,12 @@
 using namespace okapi;
 
 const int platformLiftPosition = 2600;
-const int drivingLiftPosition = 1220;
+const int drivingLiftPosition = 1270;
 const int holdingLiftPosition = 1470;
 
 std::shared_ptr<OdomChassisController> chassis =
   ChassisControllerBuilder()
-    .withMotors({9,8,19},{10,7,20})
+    .withMotors({9,8,19},{10,7,15})
     .withDimensions({AbstractMotor::gearset::blue, (60.0 / 36.0)}, {{3.25_in, 13_in}, imev5BlueTPR})
     .withOdometry()
     .buildOdometry();
@@ -249,10 +249,21 @@ void clearEncoders(){
   backRight.tare_position();
 }
 
+void dropGoalCover(){
+  goalCover.set_value(true);
+}
+
+void liftGoalCover(){
+  goalCover.set_value(false);
+}
+
 void rightGoalAuton(){
   //Pseudocode - write after comment line by line
   chassis->setMaxVelocity(400);
   
+  //Drop goal cover
+  dropGoalCover();
+
   //Dash forward to right neutral mogo
   goForwardNonPID(1820);
 
@@ -275,6 +286,10 @@ void rightGoalAuton(){
 void leftGoalAuton(){
   //Pseudocode - write after comment line by line
 
+  //Drop Goal Cover
+  dropGoalCover();
+
+  //Dash forward to left neutral mogo
   goForwardNonPID(2000);
 
   //Clamp onto right neutral mogo
@@ -318,22 +333,19 @@ void leftGoalAuton(){
 }
 
 void midGoalAuton(){
-  //Pseudocode - write after comment line by line (Start on right)
 
+  //Drop Goal Cover
+  dropGoalCover();
 
-  //Drive forward to align center of robot in line with tall neutral mogo
+  //Dash forward to left neutral mogo
+  goForwardNonPID(2550);
 
+  //Clamp onto right neutral mogo
+  frontClaw.set_value(true);
+  pros::delay(200);
 
-  //Turn left to face tall neutral mogo
-
-
-  //Drive forward into tall neutral mogo
-
-
-  //Clamp onto tall neutral mogo
-
-
-  //Drive backwards into home zone
+  //Drive backwards to align with red awp line amogo
+  goBackwardNonPID(1700);
 
   
 }
@@ -342,6 +354,9 @@ void midRightAuton(){
   //Pseudocode - write after comment line by line
   chassis->setMaxVelocity(400);
   
+  //Drop Goal Cover
+  //dropGoalCover();
+
   //Dash forward to right neutral mogo
   goForwardNonPID(1820);
 
@@ -702,33 +717,40 @@ void rightHalfWinPoint(){
   //Pseudocode - write after comment line by line
   chassis->setMaxVelocity(400);
   
+  //Drop goal cover
+  dropGoalCover();
+
   //Dash forward to right neutral mogo
-  goForwardNonPID(1820);
+  goForwardNonPID(1850);
 
   //Clamp onto right neutral mogo
   frontClaw.set_value(true);
-  pros::delay(200);
+  pros::delay(500);
 
   //Lift up to holding position async
-  liftOkapi->setTarget(holdingLiftPosition);
+  //liftOkapi->setTarget(holdingLiftPosition);
 
   //Drive backwards to clear home zone
   goBackwardNonPID(1250);
 
   //Wait until lift is fully raised to turn and clear encoders for accurate okapi turns
-  liftOkapi->waitUntilSettled();
+  //liftOkapi->waitUntilSettled();
+  liftForHolding();
+
   clearEncoders();
 
   pros::delay(500);
 
-  chassis->setMaxVelocity(225);
-  chassis->turnAngle(-82_deg);
+  chassis->setMaxVelocity(170);
+  chassis->turnAngle(-97_deg);
   chassis->setMaxVelocity(600);
 
   pros::delay(200);
 
+  chassis->setMaxVelocity(400);
+
   profileController->generatePath(
-      {{0_ft, 0_ft, 0_deg}, {1.08_ft, 0_ft, 0_deg}}, "rightAmogoGrab");
+      {{0_ft, 0_ft, 0_deg}, {1.55_ft, 0_ft, 0_deg}}, "rightAmogoGrab");
   //Set robot to follow the above path
   profileController->setTarget("rightAmogoGrab", true);
   profileController->waitUntilSettled();
@@ -737,94 +759,210 @@ void rightHalfWinPoint(){
 
   liftForPlatform();
 
-  chassis->setMaxVelocity(325);
-  chassis->turnAngle(-65_deg);
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {0.45_ft, 0_ft, 0_deg}}, "rightRingsAlign");
+  //Set robot to follow the above path
+  profileController->setTarget("rightRingsAlign");
+  profileController->waitUntilSettled();
+
+  chassis->setMaxVelocity(170);
+  chassis->turnAngle(98_deg);
   chassis->setMaxVelocity(600);
 
-  intake.move_velocity(525);
+  intake.move_velocity(550);
 
   pros::delay(500);
 
+  chassis->setMaxVelocity(200);
+
   profileController->generatePath(
-      {{0_ft, 0_ft, 0_deg}, {2.5_ft, 0_ft, 0_deg}}, "rightMatchLoads");
+      {{0_ft, 0_ft, 0_deg}, {14_ft, 0_ft, 0_deg}}, "rightMatchLoads");
   //Have the robot follow the path above
   profileController->setTarget("rightMatchLoads");
   profileController->waitUntilSettled();
 
-  pros::delay(400);
+  profileController->setTarget("rightMatchLoads", true);
+  profileController->waitUntilSettled();
 
   dropBackpack();
 
+  pros::delay(400);
+
   intake = 0;
+
+  liftGoalCover();
+
+  liftForDriving();
+
 }
 
 void leftHalfWinPoint(){
   //Pseudocode - write after comment line by line
 
+  //Drop goal cover
+  dropGoalCover();
+
+  //Dash foward to left neutral mogo
   goForwardNonPID(2000);
 
   //Clamp onto right neutral mogo
   frontClaw.set_value(true);
   pros::delay(200);
 
-  //Lift up to holding position async
-  liftOkapi->setTarget(holdingLiftPosition);
-
   //Drive backwards to align with red awp line amogo
-  goBackwardNonPID(1700);
+  goBackwardNonPID(1300);
 
-  //Wait until lift is fully raised to turn
-  liftOkapi->waitUntilSettled();
+  frontClaw.set_value(false);
+  pros::delay(500);
+
+  liftGoalCover();
 
   clearEncoders();
 
   pros::delay(500);
 
-  chassis->setMaxVelocity(325);
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {0.1_ft, 0_ft, 0_deg}}, "leftAmogoAlign");
+  //Set robot to follow the above path
+  profileController->setTarget("leftAmogoAlign", true);
+  profileController->waitUntilSettled();
+
+  chassis->setMaxVelocity(170);
   chassis->turnAngle(-60_deg);
   chassis->setMaxVelocity(600);
 
   profileController->generatePath(
-      {{0_ft, 0_ft, 0_deg}, {1.1_ft, 0_ft, 0_deg}}, "leftAmogoBack");
-  //Have the robot follow the path above in reverse
+      {{0_ft, 0_ft, 0_deg}, {1.3_ft, 0_ft, 0_deg}}, "leftAmogoBack");
+  //Set robot to follow the above path
   profileController->setTarget("leftAmogoBack", true);
   profileController->waitUntilSettled();
 
   clampBackpack();
 
-  chassis->setMaxVelocity(325);
-  chassis->turnAngle(-60_deg);
+  profileController->setTarget("leftAmogoBack");
+  profileController->waitUntilSettled();
+
+  chassis->setMaxVelocity(170);
+  chassis->turnAngle(-110_deg);
   chassis->setMaxVelocity(600);
-
-  pros::delay(200);
-  
-  intake.move_velocity(500);
-
-  chassis->setMaxVelocity(425);
 
   liftForPlatform();
 
-  //Generate a path for the robot to drive towards the alliance station wall while picking up match loads
+  intake = 600;
+
+  chassis->setMaxVelocity(300);
   profileController->generatePath(
-      {{0_ft, 0_ft, 0_deg}, {2.5_ft, 0_ft, 0_deg}}, "leftMatchLoads");
-  //Have the robot follow the path above
-  profileController->setTarget("leftMatchLoads");
+      {{0_ft, 0_ft, 0_deg}, {2.5_ft, 0_ft, 0_deg}}, "matchLoadRings");
+  //Set robot to follow the above path
+
+  profileController->setTarget("matchLoadRings");
   profileController->waitUntilSettled();
 
-  pros::delay(400);
-
-  profileController->setTarget("leftMatchLoads", true);
+  profileController->setTarget("matchLoadRings", true);
+  profileController->waitUntilSettled();
+  
+  profileController->setTarget("matchLoadRings");
   profileController->waitUntilSettled();
 
-  profileController->setTarget("leftMatchLoads");
+  profileController->setTarget("matchLoadRings", true);
   profileController->waitUntilSettled();
 
-  pros::delay(400);
-
-  dropBackpack();
+  chassis->setMaxVelocity(170);
+  chassis->turnAngle(-200_deg);
+  chassis->setMaxVelocity(600);
 
   intake = 0;
 
+  dropBackpack();
+  
+
+  liftForDriving();
+}
+
+void midHalfWinPoint(){
+  
+  //Drop Goal Cover
+  dropGoalCover();
+
+  //Dash forward to left neutral mogo
+  goForwardNonPID(2450);
+
+  //Clamp onto right neutral mogo
+  frontClaw.set_value(true);
+  pros::delay(200);
+
+  //Drive backwards to align with red awp line amogo
+  goBackwardNonPID(1350);
+
+  frontClaw.set_value(false);
+  pros::delay(500);
+
+  clearEncoders();
+
+  liftGoalCover();
+
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {0.1_ft, 0_ft, 0_deg}}, "rightAmogoAlign");
+  //Set robot to follow the above path
+  profileController->setTarget("rightAmogoAlign", true);
+  profileController->waitUntilSettled();
+
+  chassis->setMaxVelocity(170);
+  chassis->turnAngle(-71_deg);
+  chassis->setMaxVelocity(600);
+
+  chassis->setMaxVelocity(400);
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {4.2_ft, 0_ft, 0_deg}}, "rightAmogoGrab");
+  //Set robot to follow the above path
+  profileController->setTarget("rightAmogoGrab", true);
+  profileController->waitUntilSettled();
+  chassis->setMaxVelocity(600);
+
+  clampBackpack();
+
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {1_ft, 0_ft, 0_deg}}, "matchLoadsAlign");
+  //Set robot to follow the above path
+  profileController->setTarget("matchLoadsAlign");
+  profileController->waitUntilSettled();
+
+  chassis->setMaxVelocity(170);
+  chassis->turnAngle(-90_deg);
+  chassis->setMaxVelocity(600);
+
+  liftForPlatform();
+
+  intake = 600;
+
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {2_ft, 0_ft, 0_deg}}, "matchLoadsFill");
+  //Set robot to follow the above path
+  
+  profileController->setTarget("matchLoadsFill");
+  profileController->waitUntilSettled();
+
+  profileController->setTarget("matchLoadsFill", true);
+  profileController->waitUntilSettled();
+
+  profileController->setTarget("matchLoadsFill");
+  profileController->waitUntilSettled();
+
+  profileController->setTarget("matchLoadsFill", true);
+  profileController->waitUntilSettled();
+
+  chassis->setMaxVelocity(170);
+  chassis->turnAngle(100_deg);
+  chassis->setMaxVelocity(600);
+
+  dropBackpack();
+
+  liftForDriving();
+
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {0.3_ft, 0_ft, 0_deg}}, "middleGoalPrep");
+  profileController->setTarget("middleGoalPrep");
+  profileController->waitUntilSettled();
 }
 
 void fullWinPoint(){
@@ -834,7 +972,7 @@ void fullWinPoint(){
 
   //Generate path to have robot be perpidicularly aligned with the right side alliance mobile goal
   profileController->generatePath(
-      {{0_ft, 0_ft, 0_deg}, {1.65_ft, 0_ft, 0_deg}}, "rightAmogoAlign");
+      {{0_ft, 0_ft, 0_deg}, {1.45_ft, 0_ft, 0_deg}}, "rightAmogoAlign");
   //Set robot to follow the above path
   profileController->setTarget("rightAmogoAlign");
   profileController->waitUntilSettled();
@@ -843,7 +981,7 @@ void fullWinPoint(){
   chassis->setMaxVelocity(325);
 
   //Turn the chassis left to align the backpack with the right side alliance mobile goal
-  chassis->turnAngle(-98.5_deg);
+  chassis->turnAngle(-95_deg);
 
   //Set the limit for chassis linear velocity (Special Case: Backpacking mobile goal)
   chassis->setMaxVelocity(450);
@@ -862,7 +1000,7 @@ void fullWinPoint(){
   liftOkapi->setTarget(holdingLiftPosition);
 
   //Turn slightly to the left to straighten the robot
-  chassis->turnAngle(-2_deg);
+  chassis->turnAngle(1_deg);
 
   //Set the limit for chassis linear velocity
   chassis->setMaxVelocity(600);
@@ -897,14 +1035,14 @@ void fullWinPoint(){
   chassis->setMaxVelocity(325);
 
   //Turn the robot to the right to align the backpack with the left alliance mobile goal
-  chassis->turnAngle(48_deg);
+  chassis->turnAngle(43_deg);
 
   //Set the limit for chassis linear velocity (Special case: Alliance mogo backpack)
   chassis->setMaxVelocity(450);
 
   //Generate a path for the robot to back into the left alliance mobile goal
   profileController->generatePath(
-      {{0_ft, 0_ft, 0_deg}, {2.42_ft, 0_ft, 0_deg}}, "leftAmogoBack");
+      {{0_ft, 0_ft, 0_deg}, {2.22_ft, 0_ft, 0_deg}}, "leftAmogoBack");
   //Have the robot follow the path above in reverse
   profileController->setTarget("leftAmogoBack", true);
   profileController->waitUntilSettled();
@@ -924,7 +1062,7 @@ void fullWinPoint(){
   chassis->setMaxVelocity(325);
 
   //Turn left to face towards the alliance station wall
-  chassis->turnAngle(-65_deg);
+  chassis->turnAngle(-50_deg);
 
   //Start the intake
   intake.move_velocity(550);
@@ -965,7 +1103,7 @@ void testSkills(){
 
   //Funny turn 
   chassis->setMaxVelocity(325);
-  chassis->turnAngle(-137_deg);
+  chassis->turnAngle(-142_deg);
   chassis->setMaxVelocity(600);
 
   liftForPlatform();
@@ -993,14 +1131,14 @@ void testSkills(){
   
   //back up from platform
   profileController->generatePath(
-      {{0_ft, 0_ft, 0_deg}, {0.95_ft, 0_ft, 0_deg}}, "backUpFirstMogoPlatform");
+      {{0_ft, 0_ft, 0_deg}, {0.9_ft, 0_ft, 0_deg}}, "backUpFirstMogoPlatform");
   //Set robot to follow the above path
   profileController->setTarget("backUpFirstMogoPlatform", true);
   profileController->waitUntilSettled();
 
   //Turn to face red goal
   chassis->setMaxVelocity(325);
-  chassis->turnAngle(-135_deg);
+  chassis->turnAngle(-136_deg);
   chassis->setMaxVelocity(600);
 
   liftForDriving();
@@ -1025,8 +1163,9 @@ void testSkills(){
   //lift goal up for driving
   liftForHolding();
 
+  //turn towards red platform
   chassis->setMaxVelocity(325);
-  chassis->turnAngle(-120_deg);
+  chassis->turnAngle(-115_deg);
   chassis->setMaxVelocity(600);
 
   liftForPlatform();
@@ -1035,7 +1174,7 @@ void testSkills(){
 
   //Drive to red platform
   profileController->generatePath(
-      {{0_ft, 0_ft, 0_deg}, {15.2_ft, 0_ft, 0_deg}}, "redMogoPlatform");
+      {{0_ft, 0_ft, 0_deg}, {15.3_ft, 0_ft, 0_deg}}, "redMogoPlatform");
   //Set robot to follow the above path
   profileController->setTarget("redMogoPlatform");
   profileController->waitUntilSettled();
@@ -1043,12 +1182,12 @@ void testSkills(){
   intake = 0;
 
   lift = -127;
-  pros::delay(500);
+  pros::delay(600);
   lift = 0;
 
   frontClaw.set_value(false);
 
-  pros::delay(400);
+  pros::delay(500);
 
   clearEncoders();
 
@@ -1056,34 +1195,114 @@ void testSkills(){
   pros::delay(300);
   lift = 0;
 
+  //back up from red platform
   profileController->generatePath(
-      {{0_ft, 0_ft, 0_deg}, {0.3_ft, 0_ft, 0_deg}}, "redMogoPlatformBack");
+      {{0_ft, 0_ft, 0_deg}, {0.39_ft, 0_ft, 0_deg}}, "redMogoPlatformBack");
   //Set robot to follow the above path
   profileController->setTarget("redMogoPlatformBack", true);
   profileController->waitUntilSettled();
 
   clearEncoders();
 
+  //turn towards blue mogo
   chassis->setMaxVelocity(325);
-  chassis->turnAngle(-60_deg);
+  chassis->turnAngle(-67_deg);
   chassis->setMaxVelocity(600);
+
+  intake = 0;
 
   liftForDriving();
 
+  //drive to blue mogo
   profileController->generatePath(
-      {{0_ft, 0_ft, 0_deg}, {6.5_ft, 0_ft, 0_deg}}, "blueMogo");
+      {{0_ft, 0_ft, 0_deg}, {5.4_ft, 0_ft, 0_deg}}, "blueMogo");
   //Set robot to follow the above path
-  profileController->setTarget("blueMogo", true);
+  profileController->setTarget("blueMogo");
   profileController->waitUntilSettled();
 
   frontClaw.set_value(true);
 
   liftForHolding();
 
+  //drive to blue mogo
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {0.85_ft, 0_ft, 0_deg}}, "blueMogoBack");
+  //Set robot to follow the above path
+  profileController->setTarget("blueMogoBack", true);
+  profileController->waitUntilSettled();
+
   chassis->setMaxVelocity(325);
-  chassis->turnAngle(-100_deg);
+  chassis->turnAngle(85_deg);
   chassis->setMaxVelocity(600);
 
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {10_ft, 0_ft, 0_deg}}, "leftNeutralBack");
+  //Set robot to follow the above path
+  profileController->setTarget("leftNeutralBack", true);
+  profileController->waitUntilSettled();
 
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {1_ft, 0_ft, 0_deg}}, "tallGoalAlign");
+  //Set robot to follow the above path
+  profileController->setTarget("tallGoalAlign");
+  profileController->waitUntilSettled();
+
+  clearEncoders();
+
+  chassis->setMaxVelocity(325);
+  chassis->turnAngle(-130_deg);
+  chassis->setMaxVelocity(600);
+
+  frontClaw.set_value(false);
+
+  pros::delay(200);
+
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {15_ft, 0_ft, 0_deg}}, "tallGoalPush");
+  //Set robot to follow the above path
+  profileController->setTarget("tallGoalPush", true);
+  profileController->waitUntilSettled();
   
+}
+
+void leftAwpRingsOnly(){
+  
+  clampBackpack();
+
+  intake = 600;
+
+  liftForPlatform();
+
+  chassis->setMaxVelocity(250);
+
+  profileController->generatePath(
+      {{0_ft, 0_ft, 0_deg}, {6_ft, 0_ft, 0_deg}}, "leftAmogoRings");
+  //Have the robot follow the path above
+  profileController->setTarget("leftAmogoRings");
+  profileController->waitUntilSettled();
+
+  profileController->setTarget("leftAmogoRings", true);
+  profileController->waitUntilSettled();
+
+  profileController->setTarget("leftAmogoRings");
+  profileController->waitUntilSettled();
+
+  profileController->setTarget("leftAmogoRings", true);
+  profileController->waitUntilSettled();
+
+  profileController->setTarget("leftAmogoRings");
+  profileController->waitUntilSettled();
+
+  dropBackpack();
+
+  intake = 0;
+
+  liftForDriving();
+
+  profileController->setTarget("leftAmogoRings", true);
+  profileController->waitUntilSettled();
+
+  profileController->setTarget("leftAmogoRings");
+  profileController->waitUntilSettled();
+
 }

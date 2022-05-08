@@ -13,8 +13,10 @@ extern pros::Motor intake;
 extern pros::ADIAnalogIn liftPot;
 extern pros::Imu inertial;
 extern pros::ADIDigitalOut frontClaw;
-extern pros::ADIDigitalOut dumpTruck;
+extern pros::ADIDigitalOut dumpTruckLeft;
+extern pros::ADIDigitalOut dumpTruckRight;
 extern pros::ADIEncoder trackingWheel;
+extern pros::ADIDigitalOut goalCover;
 
 //Controller
 extern pros::Controller controller;

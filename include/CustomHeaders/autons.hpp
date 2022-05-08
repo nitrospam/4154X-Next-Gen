@@ -6,5 +6,7 @@ void midRightAuton();
 void testerAuton();
 void leftHalfWinPoint();
 void rightHalfWinPoint();
+void midHalfWinPoint();
 void fullWinPoint();
 void testSkills();
+void leftAwpRingsOnly();

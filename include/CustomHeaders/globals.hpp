@@ -16,6 +16,8 @@ extern pros::ADIDigitalOut frontClaw;
 extern pros::ADIDigitalOut dumpTruckLeft;
 extern pros::ADIDigitalOut dumpTruckRight;
 extern pros::ADIEncoder trackingWheel;
+extern pros::ADIDigitalOut goalCover;
+extern pros::ADIDigitalOut elStick;
 
 //Controller
 extern pros::Controller controller;
@@ -23,3 +25,4 @@ extern pros::Controller controller;
 //Helper Variables
 extern bool clawToggle;
 extern bool dumpToggle;
+extern bool stickToggle;

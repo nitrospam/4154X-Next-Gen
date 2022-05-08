@@ -4,8 +4,8 @@
 
 //selector configuration
 #define HUE 180
-#define DEFAULT 1
-#define AUTONS "Middle Goal", "Right Goal", "Left Goal", "RightMiddle"
+#define DEFAULT 4
+#define AUTONS "RGoal", "LGoal", "Mawp", "Rawp", "Lawp", "Fawp"
 
 namespace selector{
 

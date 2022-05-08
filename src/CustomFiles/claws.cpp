@@ -2,6 +2,8 @@
 
 //vars
 bool goalInBackpack = false;
+bool goalCoverToggle = false;
+bool stickToggle = false;
 
 //Helpers
 void clawActuate(){
@@ -39,6 +41,12 @@ void setClawPistons(){
     }
     if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){
         frontClaw.set_value(false);
+    }
+    if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)){
+       goalCover.set_value(true);
+    }
+    if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)){
+       goalCover.set_value(false);
     }
     if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)){
         dumpTruckLeft.set_value(true);

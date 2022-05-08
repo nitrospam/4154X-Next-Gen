@@ -1,5 +1,5 @@
 #include "main.h"
-#include "autoSelect/selection.h"
+#include "selection.h"
 
 namespace selector{
 
@@ -118,7 +118,7 @@ void init(int hue, int default_auton, const char **autons){
 	// skills tab
 	lv_obj_t *skillsBtn = lv_btn_create(skillsTab, NULL);
 	lv_obj_t *label = lv_label_create(skillsBtn, NULL);
-	lv_label_set_text(label, "Skills");
+	lv_label_set_text(label, "Showtime");
 	lv_btn_set_action(skillsBtn, LV_BTN_ACTION_CLICK, *skillsBtnAction);
 	// lv_btn_set_state(skillsBtn, LV_BTN_STATE_TGL_REL);
 	lv_obj_set_size(skillsBtn, 450, 50);

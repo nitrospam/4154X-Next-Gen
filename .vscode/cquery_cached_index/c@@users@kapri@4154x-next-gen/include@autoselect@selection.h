@@ -3,9 +3,10 @@
 #include <string>
 
 //selector configuration
-#define HUE 230
+#define HUE 180
 #define DEFAULT 1
-#define AUTONS "Mid Goal", "Right Goal", "Left Goal"
+#define AUTONS "RGoal", "LGoal", "RMid", "Rawp", "Lawp", "Fawp"
+
 namespace selector{
 
 extern int auton;

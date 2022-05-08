@@ -1,5 +1,9 @@
 #include "main.h"
 
+//vars
+bool goalInBackpack = false;
+bool goalCoverToggle = false;
+
 //Helpers
 void clawActuate(){
     if(clawToggle == false){
@@ -15,11 +19,13 @@ void clawActuate(){
 
 void dumpActuate(){
     if(dumpToggle == false){
-        dumpTruck.set_value(true);
+        dumpTruckLeft.set_value(true);
+        dumpTruckRight.set_value(true);
         dumpToggle = true;
     }
     else{
-        dumpTruck.set_value(false);
+        dumpTruckLeft.set_value(false);
+        dumpTruckRight.set_value(true);
         dumpToggle = false;
     }
 
@@ -29,17 +35,27 @@ void dumpActuate(){
 
 void setClawPistons(){
 
-    if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){
-        while (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){
-            pros::delay(1);
-        }
-        dumpActuate();
-    }
     if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
-        while (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
-            pros::delay(1);
-        }
-        clawActuate();
+        frontClaw.set_value(true);
     }
-
+    if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){
+        frontClaw.set_value(false);
+    }
+    if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)){
+       goalCover.set_value(true);
+    }
+    if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)){
+       goalCover.set_value(false);
+    }
+    if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_A)){
+        dumpTruckLeft.set_value(true);
+        dumpTruckRight.set_value(true);
+        goalInBackpack = true;
+    }
+    if(controller.get_digital(pros::E_CONTROLLER_DIGITAL_X)){
+        dumpTruckLeft.set_value(false);
+        dumpTruckRight.set_value(false);
+        goalInBackpack = false;
+        intake = 0;
+    }
 }
